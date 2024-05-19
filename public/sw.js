@@ -1,8 +1,27 @@
-importScripts('/uv/uv.bundle.js');
-importScripts('/uv/uv.config.js');
-importScripts(__uv$config.sw || '/uv/uv.sw.js');
+importScripts("/dy/config.js?v=12")
+importScripts("/dy/worker.js?v=12")
+importScripts("/assets/-/bundle.js?v=5-5-2024")
+importScripts("/assets/-/config.js?v=5-5-2024")
+importScripts(__uv$config.sw || "/assets/-/sw.js?v=2")
 
-let userKey = new URL(location).searchParams.get('userkey');
-const sw = new UVServiceWorker();
+const uv = new UVServiceWorker()
+const dynamic = new Dynamic()
 
-self.addEventListener('fetch', (event) => event.respondWith(sw.fetch(event)));
+let userKey = new URL(location).searchParams.get("userkey")
+self.dynamic = dynamic
+
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    (async function () {
+      if (await dynamic.route(event)) {
+        return await dynamic.fetch(event)
+      }
+
+      if (event.request.url.startsWith(location.origin + "/a/")) {
+        return await uv.fetch(event)
+      }
+
+      return await fetch(event.request)
+    })()
+  )
+})
